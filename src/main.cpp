@@ -6,9 +6,6 @@
 
 #define BUTTON_PIN GPIO_NUM_14
 
-#define Fbattery 3700 //The default battery is 3700mv when the battery is fully charged.
-
-//float XS = 0.00225; //The returned reading is multiplied by this XS to get the battery voltage.
 float XS = (0.00225) * 3700 / 5450; //Empirical fudge
 uint16_t MUL = 1000;
 uint16_t MMUL = 100;
@@ -48,12 +45,14 @@ void loop()
     if (bleKeyboard.isConnected())
     {
       u8g2.drawStr(0, 0, "That's it! I'm going!");
-      meetingCount++;
-      EEPROM.writeInt(0, meetingCount);
-      EEPROM.commit();
+      // meetingCount++;
+      // EEPROM.writeInt(0, meetingCount);
+      // EEPROM.commit();
       sprintf(chBuffer, "Meetings left: %d", EEPROM.readInt(0));
       u8g2.drawStr(0, 20, chBuffer);
       u8g2.sendBuffer();
+      bleKeyboard.press(KEY_RIGHT_GUI);
+      bleKeyboard.press(KEY_RIGHT_SHIFT);
       bleKeyboard.press(KEY_LEFT_CTRL);
       delay(100);
 

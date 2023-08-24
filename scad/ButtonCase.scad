@@ -46,19 +46,21 @@ module case(h=30) {
             translate([0,-32,0]) rotate([0,0,90]) sparse_strut(h=h, strut=2,l=70-wt*4, thick=3);
         }
         
-        #translate([25.75,25.75,h/2-14]) cylinder(14,d=5.5);
+        translate([25.75,25.75,h/2-14]) cylinder(14,d=5.5);
         translate([-25.75,-25.75,h/2-14])cylinder(h=14,d=5.5);
-        translate([25.75,-25.75,h/2-14])cylinder(h=14,d=5.5);
+        translate([25.75,-25.75,h/2-14])cylinder(h=24,d=5.5);
         translate([-25.75,25.75,h/2-14]) cylinder(h=14,d=5.5);
 
-        translate([25.75,25.75,h/2]) downcyl(l=1,d2=6,d1=5);
-        translate([-25.75,-25.75,h/2]) downcyl(l=1,d2=6,d1=5);
-        translate([25.75,-25.75,h/2]) downcyl(l=1,d2=6,d1=5);
-        translate([-25.75,25.75,h/2]) downcyl(l=1,d2=6,d1=5);
+        translate([25.75,25.75,h/2]) downcyl(l=1.5,d2=6.2,d1=5);
+        translate([-25.75,-25.75,h/2]) downcyl(l=1.5,d2=6.2,d1=5);
+        translate([25.75,-25.75,h/2]) downcyl(l=1.5,d2=6.2,d1=5);
+        translate([-25.75,25.75,h/2]) downcyl(l=1.5,d2=6.2,d1=5);
 
         translate([32,3,-4]) cuboid([10,33.5,20.5]);
-        translate([31,-30,-4]) cuboid([10,10,10]);
+        #translate([31,-30,-4]) cuboid([10,10,12]);
         translate([28,-24,-4]) cuboid([6,10,26]);
+
+        translate([24,-24,-4]) cuboid([8,10,10]);
     }
     }
 }
