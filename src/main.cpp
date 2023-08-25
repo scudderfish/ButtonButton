@@ -45,9 +45,9 @@ void loop()
     if (bleKeyboard.isConnected())
     {
       u8g2.drawStr(0, 0, "That's it! I'm going!");
-      // meetingCount++;
-      // EEPROM.writeInt(0, meetingCount);
-      // EEPROM.commit();
+      meetingCount++;
+      EEPROM.writeInt(0, meetingCount);
+      EEPROM.commit();
       sprintf(chBuffer, "Meetings left: %d", EEPROM.readInt(0));
       u8g2.drawStr(0, 20, chBuffer);
       u8g2.sendBuffer();
@@ -66,7 +66,6 @@ void loop()
     esp_sleep_enable_ext0_wakeup(BUTTON_PIN, 1);
     esp_deep_sleep_start();
   }
-  bleKeyboard.setBatteryLevel(90);
   u8g2.drawStr(0, 0, "Panic Button");
   sprintf(chBuffer, "Meetings left : %d", meetingCount);
   u8g2.drawStr(0, 10, chBuffer);
@@ -75,5 +74,9 @@ void loop()
   sprintf(chBuffer, "Battery : %d", (c / 100) * 100);
   u8g2.drawStr(0, 20, chBuffer);
   u8g2.sendBuffer();
+  uint16_t batLevel = (c / 390) * 10;
+  // Serial.printf("Setting batLevel to %d %d\n", c, batLevel);
+  bleKeyboard.setBatteryLevel(batLevel);
+
   delay(100);
 }
