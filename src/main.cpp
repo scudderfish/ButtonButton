@@ -16,6 +16,8 @@ char chBuffer[128];
 BleKeyboard bleKeyboard("Panic Button");
 
 int32_t meetingCount = 0;
+int32_t totalDurationSeconds = 0;
+int32_t startTime = millis();
 
 void setup()
 {
@@ -32,12 +34,15 @@ void setup()
   pinMode(BUTTON_PIN, INPUT_PULLUP);
   adcAttachPin(13);
   analogSetClockDiv(255); // 1338mS
-  EEPROM.begin(sizeof(int32_t));
+  EEPROM.begin(2 * sizeof(int32_t));
   meetingCount = max(0, EEPROM.readInt(0));
+  totalDurationSeconds = max(0, EEPROM.readInt(sizeof(int32_t)));
+  Serial.printf("INIT meeting count: %d  TDS: %d\n", meetingCount, totalDurationSeconds);
 }
 
 void loop()
 {
+  int32_t currentDurationSeconds = ((millis() - startTime) / 1000);
   u8g2.clearBuffer();
   if (digitalRead(BUTTON_PIN) == 0)
   { //Button is down
@@ -46,7 +51,10 @@ void loop()
     {
       u8g2.drawStr(0, 0, "That's it! I'm going!");
       meetingCount++;
+      Serial.printf("Meeting count is now %d\n", meetingCount);
+      totalDurationSeconds = totalDurationSeconds + currentDurationSeconds;
       EEPROM.writeInt(0, meetingCount);
+      EEPROM.writeInt(sizeof(int32_t), totalDurationSeconds);
       EEPROM.commit();
       sprintf(chBuffer, "Meetings left: %d", EEPROM.readInt(0));
       u8g2.drawStr(0, 20, chBuffer);
@@ -66,13 +74,27 @@ void loop()
     esp_sleep_enable_ext0_wakeup(BUTTON_PIN, 1);
     esp_deep_sleep_start();
   }
+
   u8g2.drawStr(0, 0, "Panic Button");
-  sprintf(chBuffer, "Meetings left : %d", meetingCount);
+  sprintf(chBuffer, "Meetings quit : %d", meetingCount);
   u8g2.drawStr(0, 10, chBuffer);
+  int currentTotal = totalDurationSeconds + currentDurationSeconds;
+  int currentSeconds = (currentTotal % 60);
+  int currentMinutes = (currentTotal / 60) % 60;
+  int currentHours = (currentTotal / 3600) % 8;
+  int currentDays = (currentTotal / 3600) / 8;
+  sprintf(chBuffer, "Total   : %dd%dh%02dm%02ds", currentDays, currentHours, currentMinutes, currentSeconds);
+  u8g2.drawStr(0, 20, chBuffer);
+  sprintf(chBuffer, "Current : %ds", currentDurationSeconds);
+  u8g2.drawStr(0, 30, chBuffer);
 
   uint16_t c = analogRead(37) * XS * MUL;
   sprintf(chBuffer, "Battery : %d", (c / 100) * 100);
-  u8g2.drawStr(0, 20, chBuffer);
+  u8g2.drawStr(0, 40, chBuffer);
+  if (!bleKeyboard.isConnected())
+  {
+    u8g2.drawStr(0, 50, "Not Connected");
+  }
   u8g2.sendBuffer();
   uint16_t batLevel = (c / 390) * 10;
   // Serial.printf("Setting batLevel to %d %d\n", c, batLevel);
