@@ -39,7 +39,17 @@ void setup()
   totalDurationSeconds = max(0, EEPROM.readInt(sizeof(int32_t)));
   Serial.printf("INIT meeting count: %d  TDS: %d\n", meetingCount, totalDurationSeconds);
 }
+void sendIt()
+{
+  bleKeyboard.press(KEY_RIGHT_GUI);
+  bleKeyboard.press(KEY_RIGHT_SHIFT);
+  bleKeyboard.press(KEY_LEFT_CTRL);
+  delay(100);
 
+  bleKeyboard.press('w');
+  delay(500);
+  bleKeyboard.releaseAll();
+}
 void loop()
 {
   int32_t currentDurationSeconds = ((millis() - startTime) / 1000);
@@ -49,25 +59,40 @@ void loop()
 
     if (bleKeyboard.isConnected())
     {
-      u8g2.drawStr(0, 0, "That's it! I'm going!");
-      meetingCount++;
-      Serial.printf("Meeting count is now %d\n", meetingCount);
-      totalDurationSeconds = totalDurationSeconds + currentDurationSeconds;
-      EEPROM.writeInt(0, meetingCount);
-      EEPROM.writeInt(sizeof(int32_t), totalDurationSeconds);
-      EEPROM.commit();
-      sprintf(chBuffer, "Meetings left: %d", EEPROM.readInt(0));
-      u8g2.drawStr(0, 20, chBuffer);
-      u8g2.sendBuffer();
-      bleKeyboard.press(KEY_RIGHT_GUI);
-      bleKeyboard.press(KEY_RIGHT_SHIFT);
-      bleKeyboard.press(KEY_LEFT_CTRL);
-      delay(100);
 
-      bleKeyboard.press('w');
-      delay(500);
-      bleKeyboard.releaseAll();
-      delay(1000);
+      if (currentDurationSeconds >= 30)
+      {
+        u8g2.drawStr(0, 0, "That's it! I'm going!");
+        meetingCount++;
+        Serial.printf("Meeting count is now %d\n", meetingCount);
+        totalDurationSeconds = totalDurationSeconds + currentDurationSeconds;
+        EEPROM.writeInt(0, meetingCount);
+        EEPROM.writeInt(sizeof(int32_t), totalDurationSeconds);
+        EEPROM.commit();
+        sprintf(chBuffer, "Meetings left: %d", EEPROM.readInt(0));
+        u8g2.drawStr(0, 20, chBuffer);
+        u8g2.sendBuffer();
+        delay(1000);
+      }
+      else if (currentDurationSeconds < 3)
+      {
+        u8g2.drawStr(0, 0, "Nuke from orbit");
+        u8g2.drawStr(0, 10, "The only way");
+        u8g2.drawStr(0, 20, "To be sure");
+        EEPROM.writeInt(0, 0);
+        EEPROM.writeInt(sizeof(int32_t), 0);
+        EEPROM.commit();
+        u8g2.sendBuffer();
+        delay(2000);
+      }
+      else
+      {
+        u8g2.drawStr(0, 0, "Pretend it");
+        u8g2.drawStr(0, 10, "didn't happen");
+        u8g2.sendBuffer();
+        sendIt();
+        delay(2000);
+      }
     }
 
     bleKeyboard.end();
